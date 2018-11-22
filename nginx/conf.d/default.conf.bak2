@@ -1,0 +1,24 @@
+server {
+    listen       80;
+    server_name  139.199.223.247;
+
+    #charset koi8-r;
+    access_log  /var/log/nginx/host.access.log  main;
+        
+        root /application/build;
+        index index.html; 
+	
+        location = /chat/showimage {
+            root /application/build/static/media;
+        }
+	location / {
+		proxy_pass http://chatapp1:9002;
+		proxy_http_version 1.1;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "Upgrade";
+	}
+	
+        error_page 404 /404.html;
+	location = /40x.html {
+	}
+}

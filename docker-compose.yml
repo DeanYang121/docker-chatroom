@@ -1,0 +1,64 @@
+version: "3"
+services:
+  nginx1:
+    build: ./nginx
+    container_name: nginx1
+    depends_on: 
+      - chatapp1
+    dns:
+      - 8.8.8.8
+      - 114.114.114.114
+    ports:
+      - "80:80"
+    hostname: nginx1
+    links:
+      - chatapp1
+    command: 
+      - /bin/sh
+      - -c
+      - |
+          nginx -g "daemon off;"
+  chatapp1:
+    build: 
+      context: ./chatapp
+    container_name: chatapp1
+    depends_on:
+      - redis1
+      - mysql1
+    dns:
+      - 8.8.8.8
+      - 114.114.114.114
+    ports:
+      - "9002:9002"
+    hostname: chatapp1
+    working_dir: /home/code/chatroom/
+    links:
+      - mysql1
+      - redis1
+    command:
+      - /bin/sh
+      - -c
+      - |
+        gunicorn -c gunicorn.conf manage:app 
+  redis1:
+    build: ./redis
+    container_name: redis1
+    dns:
+      - 8.8.8.8
+      - 114.114.114.114
+    expose:
+      - "6379"
+    hostname: redis1
+  mysql1:
+    build:
+      context: ./mysql
+    container_name:  mysql1
+    dns:
+      - 8.8.8.8
+      - 114.114.114.114
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234567
+    expose:
+      - "3306"
+    hostname: mysql1
+    working_dir: "/bak"
